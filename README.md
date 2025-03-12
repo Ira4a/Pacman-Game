@@ -1,2 +1,2 @@
-# C-_-calculator
+# C++_-calculator
 practice
