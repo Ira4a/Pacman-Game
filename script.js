@@ -66,36 +66,58 @@ function moveGhosts() {
   const directions = [-1, +1, -width, +width];
 
   ghosts.forEach(ghost => {
-    let validDirections = directions.filter(dir => {
-      let next = ghost.index + dir;
-      return (
-        next >= 0 &&
-        next < layout.length &&
-        !cells[next].classList.contains("wall") &&
-        !ghosts.some(g => g !== ghost && g.index === next) // no collision
-      );
-    });
+    // Recalculate direction after 3 steps or if no valid direction
+    if (ghost.direction === null || ghost.stepCount >= 3) {
+      let validDirs = directions.filter(dir => {
+        const next = ghost.index + dir;
+        return (
+          next >= 0 &&
+          next < layout.length &&
+          !cells[next].classList.contains("wall") &&
+          !ghosts.some(g => g !== ghost && g.index === next)
+        );
+      });
 
-    if (validDirections.length > 0) {
-      let dir = validDirections[Math.floor(Math.random() * validDirections.length)];
-      let nextIndex = ghost.index + dir;
+      if (validDirs.length > 0) {
+        ghost.direction = validDirs[Math.floor(Math.random() * validDirs.length)];
+        ghost.stepCount = 0;
+      } else {
+        ghost.direction = null;
+        return;
+      }
+    }
 
+    const nextIndex = ghost.index + ghost.direction;
+
+    // Check if next move is valid
+    if (
+      nextIndex >= 0 &&
+      nextIndex < layout.length &&
+      !cells[nextIndex].classList.contains("wall") &&
+      !ghosts.some(g => g !== ghost && g.index === nextIndex)
+    ) {
       cells[ghost.index].classList.remove('ghost', ghost.class);
       ghost.index = nextIndex;
       cells[ghost.index].classList.add('ghost', ghost.class);
+      ghost.stepCount++;
+    } else {
+      // reset direction if blocked
+      ghost.direction = null;
     }
 
-    // Check collision with Pac-Man
+    // Collision with Pac-Man
     if (ghost.index === pacmanIndex) {
       gameOver(`Caught by ${ghost.name.toUpperCase()}!`);
     }
   });
 }
+
 const ghosts = [
-  { name: 'blinky', index: 141, class: 'blinky' }, // left
-  { name: 'pinky',  index: 163, class: 'pinky' },  // center
-  { name: 'inky',   index: 183, class: 'inky' }    // right
+  { name: 'blinky', index: 141, class: 'blinky', direction: null, stepCount: 0 },
+  { name: 'pinky',  index: 163, class: 'pinky',  direction: null, stepCount: 0 },
+  { name: 'inky',   index: 183, class: 'inky',   direction: null, stepCount: 0 }
 ];
+
 
 function movePacman(e) {
   erasePacman();
