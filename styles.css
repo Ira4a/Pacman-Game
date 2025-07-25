@@ -46,12 +46,29 @@ h1 {
   animation: pacman-mouth 0.3s infinite;
 }
 
-.ghost {
-  background-color: red;
-  border-radius: 50%;
-}
-
 @keyframes pacman-mouth {
   0%, 100% { clip-path: polygon(0% 0%, 100% 50%, 0% 100%); }
   50% { clip-path: circle(50% at 50% 50%); }
+}
+
+.ghost {
+  border-radius: 50%;
+  animation: ghost-float 0.5s infinite alternate;
+}
+
+.ghost.blinky {
+  background-color: red;
+}
+
+.ghost.pinky {
+  background-color: pink;
+}
+
+.ghost.inky {
+  background-color: cyan;
+}
+
+@keyframes ghost-float {
+  from { transform: translateY(0); }
+  to { transform: translateY(2px); }
 }
