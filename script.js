@@ -21,9 +21,9 @@ let score = 0;
 let timeLeft = 60;
 
 const ghosts = [
-  { name: 'blinky', index: 141, class: 'blinky' },
-  { name: 'pinky',  index: 61, class: 'pinky' },
-  { name: 'inky',   index: 183, class: 'inky' }
+  { name: 'blinky', index: 141, class: 'blinky', direction: null, stepCount: 0 },
+  { name: 'pinky',  index: 163, class: 'pinky',  direction: null, stepCount: 0 },
+  { name: 'inky',   index: 183, class: 'inky',   direction: null, stepCount: 0 }
 ];
 
 function createBoard() {
@@ -111,13 +111,6 @@ function moveGhosts() {
     }
   });
 }
-
-const ghosts = [
-  { name: 'blinky', index: 141, class: 'blinky', direction: null, stepCount: 0 },
-  { name: 'pinky',  index: 163, class: 'pinky',  direction: null, stepCount: 0 },
-  { name: 'inky',   index: 183, class: 'inky',   direction: null, stepCount: 0 }
-];
-
 
 function movePacman(e) {
   erasePacman();
