@@ -5,7 +5,9 @@ Features animations, ghosts with basic AI, scoring, a timer, and win/lose logic.
 
 ---
 
-![Pac-Man Screenshot](pacman.png)
+<p align="center">
+  <img src="pacman.png" alt="Pac-Man Screenshot" width="400" />
+</p>
 
 ---
 
