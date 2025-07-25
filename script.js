@@ -22,7 +22,7 @@ let timeLeft = 60;
 
 const ghosts = [
   { name: 'blinky', index: 141, class: 'blinky' },
-  { name: 'pinky',  index: 161, class: 'pinky' },
+  { name: 'pinky',  index: 61, class: 'pinky' },
   { name: 'inky',   index: 183, class: 'inky' }
 ];
 
