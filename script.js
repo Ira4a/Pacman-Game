@@ -66,24 +66,36 @@ function moveGhosts() {
   const directions = [-1, +1, -width, +width];
 
   ghosts.forEach(ghost => {
-    let direction = directions[Math.floor(Math.random() * directions.length)];
-    let nextIndex = ghost.index + direction;
+    let validDirections = directions.filter(dir => {
+      let next = ghost.index + dir;
+      return (
+        next >= 0 &&
+        next < layout.length &&
+        !cells[next].classList.contains("wall") &&
+        !ghosts.some(g => g !== ghost && g.index === next) // no collision
+      );
+    });
 
-    if (
-      nextIndex >= 0 &&
-      nextIndex < layout.length &&
-      !cells[nextIndex].classList.contains("wall")
-    ) {
+    if (validDirections.length > 0) {
+      let dir = validDirections[Math.floor(Math.random() * validDirections.length)];
+      let nextIndex = ghost.index + dir;
+
       cells[ghost.index].classList.remove('ghost', ghost.class);
       ghost.index = nextIndex;
       cells[ghost.index].classList.add('ghost', ghost.class);
     }
 
+    // Check collision with Pac-Man
     if (ghost.index === pacmanIndex) {
       gameOver(`Caught by ${ghost.name.toUpperCase()}!`);
     }
   });
 }
+const ghosts = [
+  { name: 'blinky', index: 141, class: 'blinky' }, // left
+  { name: 'pinky',  index: 163, class: 'pinky' },  // center
+  { name: 'inky',   index: 183, class: 'inky' }    // right
+];
 
 function movePacman(e) {
   erasePacman();
