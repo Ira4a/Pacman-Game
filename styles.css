@@ -3,6 +3,17 @@ body {
   background: black;
   color: yellow;
   text-align: center;
+  margin: 0;
+  padding: 20px;
+}
+
+h1 {
+  margin-bottom: 10px;
+}
+
+#score, #timer {
+  font-size: 20px;
+  margin: 5px;
 }
 
 .game-container {
@@ -10,7 +21,7 @@ body {
   grid-template-columns: repeat(20, 20px);
   grid-template-rows: repeat(20, 20px);
   width: 400px;
-  margin: 0 auto;
+  margin: 20px auto;
 }
 
 .cell {
@@ -32,4 +43,15 @@ body {
 .pacman {
   background-color: yellow;
   border-radius: 50%;
+  animation: pacman-mouth 0.3s infinite;
+}
+
+.ghost {
+  background-color: red;
+  border-radius: 50%;
+}
+
+@keyframes pacman-mouth {
+  0%, 100% { clip-path: polygon(0% 0%, 100% 50%, 0% 100%); }
+  50% { clip-path: circle(50% at 50% 50%); }
 }
