@@ -1,28 +1,17 @@
-# 🟡 Pac-Man Game (JavaScript)
+# 🟡 PAC-MAN (Vanilla JS Clone)
 
-A simple browser-based **Pac-Man** clone built using **HTML**, **CSS**, and **Vanilla JavaScript**.  
-Features animations, ghosts with basic AI, scoring, a timer, and win/lose logic.
+A minimalist **Pac-Man** clone written in **HTML, CSS, and JavaScript** — no frameworks, no engines, just browser magic!
 
----
-
-<p align="center">
-  <img src="pacman.png" alt="Pac-Man Screenshot" width="600" />
-</p>
-
----
+![Pac-Man Screenshot](./pacman.png)
 
 ## 🎮 Features
 
-- Classic 2D grid-based map
-- Keyboard arrow key movement
-- Animated Pac-Man mouth
-- Randomly moving ghost
-- Score counter (+10 per dot)
-- Countdown timer (60 seconds)
-- Win when all dots are eaten
-- Game Over on ghost collision or timeout
-
----
+- 🧱 Maze walls and dots
+- 🟡 Animated Pac-Man
+- 👻 Basic AI Ghost movement
+- 🕹 Arrow key movement
+- ⏱ Score and timer
+- 💀 Game Over and Win messages
 
 ## 🚀 How to Run
 https://ira4a.github.io/Pacman-Game/
