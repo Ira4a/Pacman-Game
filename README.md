@@ -1,11 +1,9 @@
-# 🟡 PAC-MAN (Vanilla JS Clone)
+# PAC-MAN
 
 A minimalist **Pac-Man** clone written in **HTML, CSS, and JavaScript** — no frameworks, no engines, just browser magic!
 ---
 
-<div align="center">
-![Pac-Man Screenshot](./pacman.png)
-</div>
+<p align="center"> <img src="./pacman.png" alt="Pac-Man Preview" width="400"/> </p>
 
 ## 🎮 Features
 
