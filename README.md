@@ -1,4 +1,4 @@
-# PAC-MAN
+<p style="color: yellow;"># PAC-MAN</p>
 
 A minimalist **Pac-Man** clone written in **HTML, CSS, and JavaScript** — no frameworks, no engines, just browser magic!
 ---
