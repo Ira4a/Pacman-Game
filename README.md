@@ -1,4 +1,4 @@
-<h1>🟡 PAC-MAN</h1>
+<h1>PAC-MAN Game</h1>
 
 A minimalist **Pac-Man** clone written in **HTML, CSS, and JavaScript** — no frameworks, no engines, just browser magic!
 
