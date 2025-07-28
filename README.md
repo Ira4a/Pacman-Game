@@ -1,7 +1,6 @@
 <h1>🟡 PAC-MAN</h1>
-_
-A minimalist **Pac-Man** clone written in **HTML, CSS, and JavaScript** — no frameworks, no engines, just browser magic!_
----
+
+A minimalist **Pac-Man** clone written in **HTML, CSS, and JavaScript** — no frameworks, no engines, just browser magic!
 
 <p align="center"> <img src="./pacman.png" alt="Pac-Man Preview" width="400"/> </p>
 
