@@ -1,186 +1,445 @@
-const game = document.getElementById("game");
-const width = 20;
-const layout = [
-  // 0 = dot, 1 = wall
-  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-  1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-  1,0,1,1,1,0,1,1,1,1,1,0,1,1,1,0,1,1,0,1,
-  1,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,
-  1,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0,1,
-  1,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,1,
-  1,0,1,1,1,1,0,1,1,1,1,1,1,0,1,0,1,1,0,1,
-  1,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,1,0,0,1,
-  1,1,1,1,0,1,1,1,0,1,1,1,1,0,1,1,1,0,1,1,
-  1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-];
-
-const cells = [];
-let pacmanIndex = 21;
-let score = 0;
-let timeLeft = 60;
-
-const ghosts = [
-  { name: 'blinky', index: 141, class: 'blinky', direction: null, stepCount: 0 },
-  { name: 'pinky',  index: 163, class: 'pinky',  direction: null, stepCount: 0 },
-  { name: 'inky',   index: 183, class: 'inky',   direction: null, stepCount: 0 }
-];
-
-function createBoard() {
-  for (let i = 0; i < layout.length; i++) {
-    const cell = document.createElement('div');
-    cell.classList.add('cell');
-    if (layout[i] === 1) {
-      cell.classList.add('wall');
-    } else {
-      cell.classList.add('dot');
-    }
-    game.appendChild(cell);
-    cells.push(cell);
+class PacmanGame {
+  constructor() {
+    this.board = document.getElementById('game-board');
+    this.scoreElement = document.getElementById('score');
+    this.highScoreElement = document.getElementById('high-score');
+    this.timerElement = document.getElementById('timer');
+    this.livesElement = document.getElementById('lives');
+    this.startButton = document.getElementById('start-btn');
+    
+    this.width = 20;
+    this.cellSize = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--cell-size'));
+    this.cells = [];
+    this.score = 0;
+    this.highScore = localStorage.getItem('pacman-highscore') || 0;
+    this.lives = 3;
+    this.timeLeft = 60;
+    this.gameActive = false;
+    this.pacmanDirection = 'right';
+    this.lastDirection = 'right';
+    
+    this.ghosts = [
+      { name: 'blinky', index: 141, class: 'blinky', direction: null, stepCount: 0, isScared: false },
+      { name: 'pinky', index: 163, class: 'pinky', direction: null, stepCount: 0, isScared: false },
+      { name: 'inky', index: 183, class: 'inky', direction: null, stepCount: 0, isScared: false },
+      { name: 'clyde', index: 201, class: 'clyde', direction: null, stepCount: 0, isScared: false }
+    ];
+    
+    this.layout = [
+      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+      1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+      1,0,1,1,1,0,1,1,1,1,1,0,1,1,1,0,1,1,0,1,
+      1,2,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,2,1,
+      1,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0,1,
+      1,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,1,
+      1,0,1,1,1,1,0,1,1,1,1,1,1,0,1,0,1,1,0,1,
+      1,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,1,0,0,1,
+      1,1,1,1,0,1,1,1,0,1,1,1,1,0,1,1,1,0,1,1,
+      1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,1,
+      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
+    ];
+    
+    this.pacmanIndex = 21;
+    this.powerPelletActive = false;
+    this.powerPelletTimer = null;
+    
+    this.init();
   }
-}
-
-function drawPacman() {
-  cells[pacmanIndex].classList.add('pacman');
-}
-
-function erasePacman() {
-  cells[pacmanIndex].classList.remove('pacman');
-}
-
-function updateScore() {
-  document.getElementById("score").innerText = "Score: " + score;
-}
-
-function updateTimer() {
-  document.getElementById("timer").innerText = "Time: " + timeLeft;
-}
-
-function drawGhosts() {
-  ghosts.forEach(ghost => {
-    cells[ghost.index].classList.add('ghost', ghost.class);
-  });
-}
-
-function moveGhosts() {
-  const directions = [-1, +1, -width, +width];
-
-  ghosts.forEach(ghost => {
-    // Recalculate direction after 3 steps or if no valid direction
-    if (ghost.direction === null || ghost.stepCount >= 3) {
-      let validDirs = directions.filter(dir => {
-        const next = ghost.index + dir;
-        return (
-          next >= 0 &&
-          next < layout.length &&
-          !cells[next].classList.contains("wall") &&
-          !ghosts.some(g => g !== ghost && g.index === next)
-        );
+  
+  init() {
+    this.createBoard();
+    this.setupEventListeners();
+    this.updateHighScore();
+  }
+  
+  createBoard() {
+    this.board.innerHTML = '';
+    this.cells = [];
+    
+    for (let i = 0; i < this.layout.length; i++) {
+      const cell = document.createElement('div');
+      cell.classList.add('cell');
+      
+      if (this.layout[i] === 1) {
+        cell.classList.add('wall');
+      } else if (this.layout[i] === 0) {
+        cell.classList.add('dot');
+      } else if (this.layout[i] === 2) {
+        cell.classList.add('power-pellet');
+      } else if (this.layout[i] === 3) {
+        cell.classList.add('tunnel');
+      }
+      
+      this.board.appendChild(cell);
+      this.cells.push(cell);
+    }
+  }
+  
+  setupEventListeners() {
+    document.addEventListener('keydown', (e) => this.handleKeyPress(e));
+    this.startButton.addEventListener('click', () => this.startGame());
+    
+    // Mobile controls
+    document.querySelectorAll('.arrow-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        this.handleKeyPress({ key: `Arrow${btn.dataset.direction.toUpperCase()}` });
       });
-
-      if (validDirs.length > 0) {
-        ghost.direction = validDirs[Math.floor(Math.random() * validDirs.length)];
-        ghost.stepCount = 0;
-      } else {
-        ghost.direction = null;
+    });
+  }
+  
+  startGame() {
+    if (this.gameActive) return;
+    
+    this.resetGame();
+    this.gameActive = true;
+    this.startButton.disabled = true;
+    this.startButton.textContent = 'GAME RUNNING';
+    
+    this.drawPacman();
+    this.drawGhosts();
+    
+    this.ghostInterval = setInterval(() => this.moveGhosts(), 500);
+    this.timerInterval = setInterval(() => {
+      this.timeLeft--;
+      this.updateTimer();
+      if (this.timeLeft <= 0) this.gameOver("TIME'S UP!");
+    }, 1000);
+  }
+  
+  resetGame() {
+    this.score = 0;
+    this.lives = 3;
+    this.timeLeft = 60;
+    this.pacmanIndex = 21;
+    this.pacmanDirection = 'right';
+    this.lastDirection = 'right';
+    this.powerPelletActive = false;
+    
+    this.ghosts = [
+      { name: 'blinky', index: 141, class: 'blinky', direction: null, stepCount: 0, isScared: false },
+      { name: 'pinky', index: 163, class: 'pinky', direction: null, stepCount: 0, isScared: false },
+      { name: 'inky', index: 183, class: 'inky', direction: null, stepCount: 0, isScared: false },
+      { name: 'clyde', index: 201, class: 'clyde', direction: null, stepCount: 0, isScared: false }
+    ];
+    
+    this.createBoard();
+    this.updateScore();
+    this.updateLives();
+    this.updateTimer();
+  }
+  
+  drawPacman() {
+    this.cells[this.pacmanIndex].classList.add('pacman', this.pacmanDirection);
+  }
+  
+  erasePacman() {
+    this.cells[this.pacmanIndex].classList.remove('pacman', 'up', 'down', 'left', 'right');
+  }
+  
+  drawGhosts() {
+    this.ghosts.forEach(ghost => {
+      this.cells[ghost.index].classList.add('ghost', ghost.class);
+      if (ghost.isScared) {
+        this.cells[ghost.index].classList.add('scared');
+      }
+    });
+  }
+  
+  eraseGhosts() {
+    this.ghosts.forEach(ghost => {
+      this.cells[ghost.index].classList.remove('ghost', 'blinky', 'pinky', 'inky', 'clyde', 'scared');
+    });
+  }
+  
+  handleKeyPress(e) {
+    if (!this.gameActive) return;
+    
+    switch (e.key) {
+      case 'ArrowUp':
+        this.pacmanDirection = 'up';
+        break;
+      case 'ArrowDown':
+        this.pacmanDirection = 'down';
+        break;
+      case 'ArrowLeft':
+        this.pacmanDirection = 'left';
+        break;
+      case 'ArrowRight':
+        this.pacmanDirection = 'right';
+        break;
+      default:
         return;
+    }
+    
+    this.lastDirection = this.pacmanDirection;
+    this.movePacman();
+  }
+  
+  movePacman() {
+    this.erasePacman();
+    
+    let nextIndex = this.pacmanIndex;
+    
+    switch (this.pacmanDirection) {
+      case 'up':
+        if (this.pacmanIndex - this.width >= 0 && !this.cells[this.pacmanIndex - this.width].classList.contains('wall')) {
+          nextIndex = this.pacmanIndex - this.width;
+        }
+        break;
+      case 'down':
+        if (this.pacmanIndex + this.width < this.layout.length && !this.cells[this.pacmanIndex + this.width].classList.contains('wall')) {
+          nextIndex = this.pacmanIndex + this.width;
+        }
+        break;
+      case 'left':
+        if (this.pacmanIndex % this.width !== 0 && !this.cells[this.pacmanIndex - 1].classList.contains('wall')) {
+          nextIndex = this.pacmanIndex - 1;
+        }
+        break;
+      case 'right':
+        if ((this.pacmanIndex + 1) % this.width !== 0 && !this.cells[this.pacmanIndex + 1].classList.contains('wall')) {
+          nextIndex = this.pacmanIndex + 1;
+        }
+        break;
+    }
+    
+    // Handle tunnel teleport
+    if (nextIndex === this.pacmanIndex && this.cells[this.pacmanIndex].classList.contains('tunnel')) {
+      if (this.pacmanDirection === 'left' && this.pacmanIndex % this.width === 0) {
+        nextIndex = this.pacmanIndex + this.width - 1;
+      } else if (this.pacmanDirection === 'right' && (this.pacmanIndex + 1) % this.width === 0) {
+        nextIndex = this.pacmanIndex - this.width + 1;
       }
     }
-
-    const nextIndex = ghost.index + ghost.direction;
-
-    // Check if next move is valid
-    if (
-      nextIndex >= 0 &&
-      nextIndex < layout.length &&
-      !cells[nextIndex].classList.contains("wall") &&
-      !ghosts.some(g => g !== ghost && g.index === nextIndex)
-    ) {
-      cells[ghost.index].classList.remove('ghost', ghost.class);
-      ghost.index = nextIndex;
-      cells[ghost.index].classList.add('ghost', ghost.class);
-      ghost.stepCount++;
-    } else {
-      // reset direction if blocked
-      ghost.direction = null;
+    
+    if (nextIndex !== this.pacmanIndex) {
+      this.pacmanIndex = nextIndex;
+      this.checkCell();
     }
-
-    // Collision with Pac-Man
-    if (ghost.index === pacmanIndex) {
-      gameOver(`Caught by ${ghost.name.toUpperCase()}!`);
+    
+    this.drawPacman();
+    this.checkCollision();
+  }
+  
+  checkCell() {
+    const cell = this.cells[this.pacmanIndex];
+    
+    if (cell.classList.contains('dot')) {
+      cell.classList.remove('dot');
+      this.score += 10;
+      this.updateScore();
+      this.playSound('waka');
+    } else if (cell.classList.contains('power-pellet')) {
+      cell.classList.remove('power-pellet');
+      this.score += 50;
+      this.updateScore();
+      this.activatePowerPellet();
+      this.playSound('waka');
     }
-  });
-}
-
-function movePacman(e) {
-  erasePacman();
-  switch (e.key) {
-    case "ArrowUp":
-      if (pacmanIndex - width >= 0 && !cells[pacmanIndex - width].classList.contains("wall"))
-        pacmanIndex -= width;
-      break;
-    case "ArrowDown":
-      if (pacmanIndex + width < layout.length && !cells[pacmanIndex + width].classList.contains("wall"))
-        pacmanIndex += width;
-      break;
-    case "ArrowLeft":
-      if (pacmanIndex % width !== 0 && !cells[pacmanIndex - 1].classList.contains("wall"))
-        pacmanIndex -= 1;
-      break;
-    case "ArrowRight":
-      if ((pacmanIndex + 1) % width !== 0 && !cells[pacmanIndex + 1].classList.contains("wall"))
-        pacmanIndex += 1;
-      break;
+    
+    this.checkWin();
   }
-
-  if (cells[pacmanIndex].classList.contains("dot")) {
-    cells[pacmanIndex].classList.remove("dot");
-    score += 10;
-    updateScore();
+  
+  activatePowerPellet() {
+    this.powerPelletActive = true;
+    this.ghosts.forEach(ghost => {
+      ghost.isScared = true;
+    });
+    this.eraseGhosts();
+    this.drawGhosts();
+    
+    if (this.powerPelletTimer) {
+      clearTimeout(this.powerPelletTimer);
+    }
+    
+    this.powerPelletTimer = setTimeout(() => {
+      this.powerPelletActive = false;
+      this.ghosts.forEach(ghost => {
+        ghost.isScared = false;
+      });
+      this.eraseGhosts();
+      this.drawGhosts();
+    }, 10000); // 10 seconds
   }
-
-  drawPacman();
-  checkWin();
-  checkCollision();
-}
-
-function checkWin() {
-  if (!document.querySelector('.dot')) {
-    stopGame();
-    alert("🎉 You Win!");
-    location.reload();
+  
+  moveGhosts() {
+    this.eraseGhosts();
+    
+    const directions = [-1, +1, -this.width, +this.width];
+    
+    this.ghosts.forEach(ghost => {
+      // Recalculate direction after 3 steps or if no valid direction
+      if (ghost.direction === null || ghost.stepCount >= 3) {
+        let validDirs = directions.filter(dir => {
+          const next = ghost.index + dir;
+          return (
+            next >= 0 &&
+            next < this.layout.length &&
+            !this.cells[next].classList.contains('wall') &&
+            !this.ghosts.some(g => g !== ghost && g.index === next)
+          );
+        });
+        
+        if (validDirs.length > 0) {
+          // If scared, move randomly
+          if (ghost.isScared) {
+            ghost.direction = validDirs[Math.floor(Math.random() * validDirs.length)];
+          } 
+          // Otherwise, move toward Pac-Man
+          else {
+            const pacmanRow = Math.floor(this.pacmanIndex / this.width);
+            const pacmanCol = this.pacmanIndex % this.width;
+            const ghostRow = Math.floor(ghost.index / this.width);
+            const ghostCol = ghost.index % this.width;
+            
+            // Calculate direction toward Pac-Man
+            const rowDiff = pacmanRow - ghostRow;
+            const colDiff = pacmanCol - ghostCol;
+            
+            // Prioritize direction based on distance
+            if (Math.abs(rowDiff) > Math.abs(colDiff)) {
+              ghost.direction = rowDiff > 0 ? +this.width : -this.width;
+            } else {
+              ghost.direction = colDiff > 0 ? +1 : -1;
+            }
+            
+            // If preferred direction isn't valid, choose a random valid one
+            if (!validDirs.includes(ghost.direction)) {
+              ghost.direction = validDirs[Math.floor(Math.random() * validDirs.length)];
+            }
+          }
+          
+          ghost.stepCount = 0;
+        } else {
+          ghost.direction = null;
+          return;
+        }
+      }
+      
+      const nextIndex = ghost.index + ghost.direction;
+      
+      // Check if next move is valid
+      if (
+        nextIndex >= 0 &&
+        nextIndex < this.layout.length &&
+        !this.cells[nextIndex].classList.contains('wall') &&
+        !this.ghosts.some(g => g !== ghost && g.index === nextIndex)
+      ) {
+        ghost.index = nextIndex;
+        ghost.stepCount++;
+      } else {
+        // reset direction if blocked
+        ghost.direction = null;
+      }
+    });
+    
+    this.drawGhosts();
+    this.checkCollision();
+  }
+  
+  checkCollision() {
+    this.ghosts.forEach(ghost => {
+      if (ghost.index === this.pacmanIndex) {
+        if (ghost.isScared) {
+          // Eat the ghost
+          ghost.isScared = false;
+          ghost.index = ghost.originalIndex || 100; // Reset ghost position
+          this.score += 200;
+          this.updateScore();
+          this.playSound('ghost');
+        } else {
+          // Lose a life
+          this.lives--;
+          this.updateLives();
+          this.playSound('game-over');
+          
+          if (this.lives <= 0) {
+            this.gameOver("GAME OVER!");
+          } else {
+            // Reset positions
+            this.erasePacman();
+            this.eraseGhosts();
+            
+            this.pacmanIndex = 21;
+            this.ghosts.forEach(g => {
+              g.index = g.originalIndex || 100 + Math.floor(Math.random() * 50);
+              g.isScared = false;
+            });
+            
+            setTimeout(() => {
+              this.drawPacman();
+              this.drawGhosts();
+            }, 1000);
+          }
+        }
+      }
+    });
+  }
+  
+  checkWin() {
+    const dotsLeft = Array.from(this.cells).some(cell => cell.classList.contains('dot') || cell.classList.contains('power-pellet'));
+    
+    if (!dotsLeft) {
+      this.gameWin();
+    }
+  }
+  
+  updateScore() {
+    this.scoreElement.textContent = `SCORE: ${this.score}`;
+    
+    if (this.score > this.highScore) {
+      this.highScore = this.score;
+      this.updateHighScore();
+    }
+  }
+  
+  updateHighScore() {
+    this.highScoreElement.textContent = `HIGH: ${this.highScore}`;
+    localStorage.setItem('pacman-highscore', this.highScore);
+  }
+  
+  updateTimer() {
+    this.timerElement.textContent = `TIME: ${this.timeLeft}`;
+  }
+  
+  updateLives() {
+    this.livesElement.textContent = `LIVES: ${this.lives}`;
+  }
+  
+  playSound(type) {
+    const sound = document.getElementById(`${type}-sound`);
+    if (sound) {
+      sound.currentTime = 0;
+      sound.play();
+    }
+  }
+  
+  gameOver(reason) {
+    this.stopGame();
+    alert(`${reason}\nYOUR SCORE: ${this.score}`);
+    this.resetGameUI();
+  }
+  
+  gameWin() {
+    this.stopGame();
+    alert(`YOU WIN!\nSCORE: ${this.score}`);
+    this.resetGameUI();
+  }
+  
+  stopGame() {
+    clearInterval(this.ghostInterval);
+    clearInterval(this.timerInterval);
+    clearTimeout(this.powerPelletTimer);
+    this.gameActive = false;
+  }
+  
+  resetGameUI() {
+    this.startButton.disabled = false;
+    this.startButton.textContent = 'PLAY AGAIN';
   }
 }
 
-function checkCollision() {
-  if (ghosts.some(g => g.index === pacmanIndex)) {
-    gameOver("Caught by ghost!");
-  }
-}
-
-function gameOver(reason) {
-  stopGame();
-  alert("💀 Game Over: " + reason);
-  location.reload();
-}
-
-function stopGame() {
-  clearInterval(ghostTimer);
-  clearInterval(timerInterval);
-}
-
-// Initialize
-createBoard();
-drawPacman();
-drawGhosts();
-updateScore();
-updateTimer();
-
-document.addEventListener('keydown', movePacman);
-
-const ghostTimer = setInterval(moveGhosts, 500);
-const timerInterval = setInterval(() => {
-  timeLeft--;
-  updateTimer();
-  if (timeLeft <= 0) gameOver("Time's up!");
-}, 1000);
+// Initialize the game when the DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  const game = new PacmanGame();
+});
