@@ -11,7 +11,7 @@ let pacmanPos = 221;
 let ghostPositions = [22, 377, 378];
 
 const layout = [
-  // 20x20 = 400 cells (0 = empty, 1 = wall)
+  // 400 клеток (20x20), 1 = стена, 0 = путь
   1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
   1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,
   1,0,1,1,0,1,1,1,0,1,0,1,1,1,0,1,1,0,0,1,
@@ -39,6 +39,7 @@ const grid = [];
 function createBoard() {
   for (let i = 0; i < layout.length; i++) {
     const cell = document.createElement("div");
+    cell.classList.add("cell");
     if (layout[i] === 1) {
       cell.classList.add("wall");
     } else {
