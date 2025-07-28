@@ -10,6 +10,11 @@ body {
 h1 {
   font-size: 2em;
 }
+button {
+  border: 3px solid yellow;
+  background-color: transparent;
+  font-size: 25px;
+}
 
 .stats {
   margin-bottom: 10px;
