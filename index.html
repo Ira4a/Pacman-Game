@@ -2,41 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pac-Man</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap">
+  <title>Pac-Man JS</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="game-wrapper">
-    <header>
-      <h1>PAC-MAN</h1>
-      <div class="game-info">
-        <div id="score">SCORE: 0</div>
-        <div id="high-score">HIGH: 0</div>
-        <div id="timer">TIME: 60</div>
-        <div id="lives">LIVES: 3</div>
-      </div>
-    </header>
-
-    <div id="game-board"></div>
-
-    <div class="controls">
-      <button id="start-btn">START GAME</button>
-      <div class="mobile-controls">
-        <button class="arrow-btn up" data-direction="up">↑</button>
-        <div>
-          <button class="arrow-btn left" data-direction="left">←</button>
-          <button class="arrow-btn down" data-direction="down">↓</button>
-          <button class="arrow-btn right" data-direction="right">→</button>
-        </div>
-      </div>
-    </div>
+  <h1>🟡 Pac-Man</h1>
+  <div class="stats">
+    <span id="score">Score: 0</span>
+    <span id="timer">Time: 60</span>
   </div>
-
-  <audio id="waka-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3" preload="auto"></audio>
-  <audio id="ghost-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-quick-jump-arcade-game-239.mp3" preload="auto"></audio>
-  <audio id="game-over-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-retro-arcade-lose-2027.mp3" preload="auto"></audio>
+  <div class="game-container" id="game"></div>
+  <div id="message"></div>
+  <button onclick="location.reload()">Restart</button>
 
   <script src="script.js" defer></script>
 </body>
